@@ -11,23 +11,21 @@ use strum_macros::EnumIter;
 use queues::*;
 
 #[allow(non_upper_case_globals)]
-static UsageMsg: &str =
-  "[Error]: wrong number of parameters.
+static UsageMsg: &str = "[Error]: wrong number of parameters.
   Usage: vim-driver <input-file> <output-file>";
 
 #[derive(PartialEq, Eq, Debug, EnumIter, Clone, Hash)]
 enum Key {
-    LowH,
-    LowJ,
-    LowK,
-    LowL
+    LowerCase(char),
+    UpperCase(char),
+    Digit(u8),
 }
 
 #[derive(PartialEq, Eq, Clone, Hash)]
 enum Mode {
     Normal,
     Insert,
-    Visual
+    Visual,
 }
 
 #[derive(PartialEq, Eq, Clone, Hash)]
@@ -37,37 +35,35 @@ struct State {
     cursor_row: u16,
     pressed: Vec<Key>,
     history: Vec<Key>,
-    mode: Mode
+    mode: Mode,
 }
 
 impl State {
     fn from_cfg(cfg: &Config) -> Result<State, io::Error> {
         Ok(State {
             text: fs::read_to_string(&cfg.input_file)?,
-            cursor_col: cfg. start_col,
-            cursor_row: cfg. start_row,
+            cursor_col: cfg.start_col,
+            cursor_row: cfg.start_row,
             pressed: vec![],
             history: vec![],
-            mode: Mode::Normal
+            mode: Mode::Normal,
         })
     }
 }
-
 
 #[derive(Debug, Deserialize)]
 struct Config {
     input_file: String,
     output_file: String,
     start_col: u16,
-    start_row: u16
+    start_row: u16,
 }
 
 fn read_input(args: &[String]) -> Result<String, io::Error> {
     match args {
-        [_, json_file] =>
-            Ok(fs::read_to_string(&json_file)?),
-        _ => panic!("{}", UsageMsg) // should be err, but must find a way to convert string to
-                                    // io::Error
+        [_, json_file] => Ok(fs::read_to_string(&json_file)?),
+        _ => panic!("{}", UsageMsg), // should be Err, but must find a way to convert string to
+                                     // io::Error
     }
 }
 
@@ -102,17 +98,16 @@ fn run(state: State, goal_txt: String) -> Vec<Key> {
 
 fn main() -> Result<(), io::Error> {
     let binding: Vec<String> = env::args().collect();
-    let args: &[String] = binding.as_slice();
-    let json_text = read_input(&args)?;
-    let cfg: Config = serde_json::from_str(&json_text)?;
-    let mut state = State::from_cfg(&cfg)?;
-    let goal_txt = fs::read_to_string(&cfg.output_file)?;
-    run(state, goal_txt);
+    let args: &[String]      = binding.as_slice();
+    let json_text            = read_input(&args)?;
+    let cfg: Config          = serde_json::from_str(&json_text)?;
+    let mut state            = State::from_cfg(&cfg)?;
+    let goal_txt             = fs::read_to_string(&cfg.output_file)?;
+    // run(state, goal_txt);
 
-    for key in Key::iter() {
-        println!("{:?}", key);
+    for a in Key::iter() {
+        println!("{:?}", a);
     }
-
 
     Ok(())
 }
