@@ -1,6 +1,6 @@
 {
-    "input_file"  : "bla",
-    "output_file" : "ble",
+    "input_file"  : "input",
+    "output_file" : "output",
     "start_col"   : 1,
     "start_row"   : 1
 }
